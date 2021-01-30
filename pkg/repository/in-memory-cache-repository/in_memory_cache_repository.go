@@ -2,7 +2,7 @@ package in_memory_cache_repository
 
 import (
 	"github.com/dgraph-io/ristretto"
-	"rate-limiter/pkg/infra/repository"
+	"rate-limiter/pkg/repository"
 	"time"
 )
 

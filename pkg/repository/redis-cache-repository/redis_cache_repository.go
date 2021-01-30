@@ -1,7 +1,7 @@
 package redis_cache_repository
 
 import (
-	"rate-limiter/pkg/infra/repository"
+	"rate-limiter/pkg/repository"
 	"time"
 )
 

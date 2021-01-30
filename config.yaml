@@ -1,0 +1,7 @@
+serverAddr: ":8080"
+appServerAddr: "http://localhost:8081"
+rules:
+  - pattern: "/suppliers/123/packages"
+    limit: 3
+  - pattern: "/suppliers/124/packages"
+    limit: 4

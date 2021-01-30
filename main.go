@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"github.com/valyala/fasthttp"
 	"log"
-	rate_limit_service "rate-limiter/pkg/domain/service/rate-limit-service"
-	in_memory_cache_repository "rate-limiter/pkg/infra/repository/in-memory-cache-repository"
-	rate_limit_rule_repository "rate-limiter/pkg/infra/repository/rate-limit-rule-repository"
+	"rate-limiter/configs"
+	"rate-limiter/pkg/repository/in-memory-cache-repository"
+	"rate-limiter/pkg/repository/rate-limit-rule-repository"
+	"rate-limiter/pkg/service/rate-limit-service"
 )
 
 const (
-	serverAddr      = ":8080"
-	appServerAddr   = "http://localhost:8081"
-	cacheMode       = "in_memory"
-	keyFormat       = "%s_%s"
 	tooManyRequests = "Too Many Requests!"
 )
+
+func init() {
+	configs.InitConfigs()
+}
 
 var (
 	cacheRepository  = in_memory_cache_repository.New()
@@ -28,19 +29,18 @@ func main() {
 
 	server.Handler = reverseProxyHandler
 
-	fmt.Println("Running on", serverAddr)
-	log.Fatalln(fasthttp.ListenAndServe(serverAddr, server.Handler))
+	fmt.Println("Running on", configs.AppConfig.ServerAddr)
+	log.Fatalln(fasthttp.ListenAndServe(configs.AppConfig.ServerAddr, server.Handler))
 }
 
 func reverseProxyHandler(ctx *fasthttp.RequestCtx) {
 	method := string(ctx.Method())
-	uri := ctx.Request.URI().RequestURI()
-	routingUrl := fmt.Sprintf("%s%s", appServerAddr, uri)
-	key := fmt.Sprintf(keyFormat, method, uri)
+	uri := string(ctx.Request.URI().RequestURI())
+	routingUrl := fmt.Sprintf("%s%s", configs.AppConfig.AppServerAddr, uri)
 
 	fmt.Printf("Received %s %s\n", method, uri)
 
-	if ok := rateLimitService.CanProceed(key); !ok {
+	if ok := rateLimitService.CanProceed(method, uri); !ok {
 		ctx.Response.SetBody([]byte(tooManyRequests))
 		ctx.Response.SetStatusCode(429)
 		fmt.Println("Too many requests!")
