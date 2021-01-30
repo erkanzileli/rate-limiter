@@ -1,7 +1,7 @@
 package repository
 
+import "context"
+
 type CacheRepository interface {
-	Get(key interface{}) interface{}
-	Set(key, value interface{})
-	Increment(key interface{}) int
+	Increment(ctx context.Context, key interface{}) (int64, error)
 }

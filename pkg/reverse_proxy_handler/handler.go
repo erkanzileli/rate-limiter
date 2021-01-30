@@ -28,7 +28,9 @@ func (h *handler) Handle(ctx *fasthttp.RequestCtx) {
 
 	fmt.Printf("Received %s %s\n", method, uri)
 
-	if ok := h.rateLimitService.CanProceed(method, uri); !ok {
+	if ok, err := h.rateLimitService.CanProceed(ctx, method, uri); err != nil {
+		fmt.Printf("Rate limit skipping due to error: %+v", err)
+	} else if !ok {
 		ctx.Response.SetBody([]byte(tooManyRequests))
 		ctx.Response.SetStatusCode(429)
 		fmt.Println("Too many requests!")

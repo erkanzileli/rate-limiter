@@ -1,9 +1,9 @@
 package in_memory_cache_repository
 
 import (
+	"context"
 	"github.com/dgraph-io/ristretto"
 	"rate-limiter/pkg/repository"
-	"time"
 )
 
 type repo struct {
@@ -23,27 +23,12 @@ func New() repository.CacheRepository {
 	return &repo{cache}
 }
 
-func (s *repo) Increment(key interface{}) int {
+func (s *repo) Increment(ctx context.Context, key interface{}) (int64, error) {
 	if value, ok := s.cache.Get(key); ok {
-		newValue := value.(int) + 1
-		s.Set(key, newValue)
-		return newValue
+		newValue := value.(int64) + 1
+		s.cache.Set(key, newValue, 1)
+		return newValue, nil
 	}
-	s.Set(key, 1)
-	return 1
-}
-
-func (s *repo) Get(key interface{}) interface{} {
-	if value, ok := s.cache.Get(key); ok {
-		return value
-	}
-	return nil
-}
-
-func (s *repo) Set(key, value interface{}) {
-	s.cache.Set(key, value, 1)
-}
-
-func (s *repo) SetWithTTL(key, value interface{}, ttl time.Duration) {
-	s.cache.SetWithTTL(key, value, 1, ttl)
+	s.cache.Set(key, 1, 1)
+	return 1, nil
 }

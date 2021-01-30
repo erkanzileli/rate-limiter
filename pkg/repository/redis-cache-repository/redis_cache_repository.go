@@ -1,6 +1,7 @@
 package redis_cache_repository
 
 import (
+	"context"
 	"github.com/go-redis/redis/v8"
 	"rate-limiter/pkg/repository"
 )
@@ -15,14 +16,6 @@ func New(redisClient *redis.Client) repository.CacheRepository {
 	}
 }
 
-func (s *repo) Set(key, value interface{}) {
-	panic("implement me")
-}
-
-func (s *repo) Increment(key interface{}) int {
-	panic("implement me")
-}
-
-func (s *repo) Get(key interface{}) interface{} {
-	panic("implement me")
+func (r *repo) Increment(ctx context.Context, key interface{}) (int64, error) {
+	return r.redisClient.Incr(ctx, key.(string)).Result()
 }
