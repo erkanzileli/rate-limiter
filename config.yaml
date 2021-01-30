@@ -6,7 +6,7 @@ redis:
   password: ""
   db: 0
 rules:
-  - pattern: "/suppliers/123/packages"
+  - pattern: "/xyz"
     limit: 3
-  - pattern: "/suppliers/124/packages"
+  - pattern: "/abc"
     limit: 4

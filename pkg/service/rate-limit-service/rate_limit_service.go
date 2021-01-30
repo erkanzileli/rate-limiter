@@ -41,8 +41,8 @@ func (s *service) CanProceed(method, uri string) bool {
 	for _, rule := range rules {
 		if matched, err := regexp.MatchString(rule.Pattern, requestKey); err == nil {
 			if matched && actualUsage > rule.Limit {
-				log.Printf("Key %s cannot be processed due to pattern %s with limit %d exceeded, actual: %d\n",
-					rule.Pattern, requestKey, rule.Limit, actualUsage)
+				log.Printf("Key %s cannot be processed due to pattern %s with limit %d was exceeded and actual is %d\n",
+					requestKey, rule.Pattern, rule.Limit, actualUsage)
 				return false
 			}
 		} else {
