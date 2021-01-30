@@ -1,19 +1,18 @@
 package redis_cache_repository
 
 import (
+	"github.com/go-redis/redis/v8"
 	"rate-limiter/pkg/repository"
-	"time"
 )
 
 type repo struct {
+	redisClient *redis.Client
 }
 
-func New() repository.CacheRepository {
-	return &repo{}
-}
-
-func (s *repo) SetWithTTL(key, value interface{}, ttl time.Duration) {
-	panic("implement me")
+func New(redisClient *redis.Client) repository.CacheRepository {
+	return &repo{
+		redisClient: redisClient,
+	}
 }
 
 func (s *repo) Set(key, value interface{}) {

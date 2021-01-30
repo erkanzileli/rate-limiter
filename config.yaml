@@ -1,5 +1,10 @@
 serverAddr: ":8080"
 appServerAddr: "http://localhost:8081"
+redis:
+  addr: localhost:6379
+  username: ""
+  password: ""
+  db: 0
 rules:
   - pattern: "/suppliers/123/packages"
     limit: 3

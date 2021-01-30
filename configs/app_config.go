@@ -7,9 +7,10 @@ import (
 
 type appConfig struct {
 	v             *viper.Viper
-	ServerAddr    string       `yaml:"SERVER_ADDR"`
-	AppServerAddr string       `yaml:"APP_SERVER_ADDR"`
-	Rules         []*model.Rule `yaml:"RULES"`
+	ServerAddr    string        `yaml:"serverAddr"`
+	AppServerAddr string        `yaml:"appServerAddr"`
+	Redis         *RedisConfig   `yaml:"redis"`
+	Rules         []*model.Rule `yaml:"rules"`
 }
 
 func (a *appConfig) readWithViper(shouldPanic bool) error {
