@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/valyala/fasthttp"
 	"log"
@@ -29,7 +28,7 @@ func main() {
 	server := &fasthttp.Server{}
 	server.Handler = handler.Handle
 
-	fmt.Println("Running on", configs.AppConfig.ServerAddr)
+	log.Println("Running on", configs.AppConfig.ServerAddr)
 	log.Fatalln(fasthttp.ListenAndServe(configs.AppConfig.ServerAddr, server.Handler))
 }
 

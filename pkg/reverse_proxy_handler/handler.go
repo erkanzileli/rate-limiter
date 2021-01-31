@@ -3,6 +3,7 @@ package reverse_proxy_handler
 import (
 	"fmt"
 	"github.com/valyala/fasthttp"
+	"log"
 	"rate-limiter/configs"
 	"rate-limiter/pkg/service/rate-limit-service"
 )
@@ -26,18 +27,18 @@ func (h *handler) Handle(ctx *fasthttp.RequestCtx) {
 	uri := string(ctx.Request.URI().RequestURI())
 	routingUrl := fmt.Sprintf("%s%s", configs.AppConfig.AppServerAddr, uri)
 
-	fmt.Printf("Received %s %s\n", method, uri)
+	log.Printf("Received %s %s\n", method, uri)
 
 	if ok, err := h.rateLimitService.CanProceed(ctx, method, uri); err != nil {
-		fmt.Printf("Rate limit skipping due to error: %+v", err)
+		log.Printf("Rate limit skipping due to error: %+v", err)
 	} else if !ok {
 		ctx.Response.SetBody([]byte(tooManyRequests))
 		ctx.Response.SetStatusCode(429)
-		fmt.Println("Too many requests!")
+		log.Println("Too many requests!")
 		return
 	}
 
-	fmt.Printf("Routing to -> %s\n", routingUrl)
+	log.Printf("Routing to -> %s\n", routingUrl)
 
 	clientReq := fasthttp.AcquireRequest()
 	clientResp := fasthttp.AcquireResponse()
