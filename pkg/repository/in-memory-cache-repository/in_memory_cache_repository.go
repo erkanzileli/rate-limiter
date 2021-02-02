@@ -29,6 +29,6 @@ func (s *repo) Increment(ctx context.Context, key interface{}) (int64, error) {
 		s.cache.Set(key, newValue, 1)
 		return newValue, nil
 	}
-	s.cache.Set(key, 1, 1)
+	s.cache.Set(key, int64(1), 1)
 	return 1, nil
 }

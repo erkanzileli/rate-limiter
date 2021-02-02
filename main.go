@@ -44,5 +44,4 @@ func initializeCacheRepository() repository.CacheRepository {
 		return redis_cache_repository.New(client)
 	}
 	return in_memory_cache_repository.New()
-
 }
