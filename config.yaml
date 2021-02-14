@@ -1,10 +1,15 @@
-serverAddr: ":8080"
+server:
+  addr: ":8080"
+  readTimeout: 1000
+  writeTimeout: 1000
 appServerAddr: "http://localhost:8081"
-redis:
-  addr: localhost:6379
-  username: ""
-  password: ""
-  db: 0
+cacheConfig:
+  inMemory: true
+  redis:
+    addr: localhost:6379
+    username: ""
+    password: ""
+    db: 0
 rules:
   - pattern: "/xyz"
     limit: 3

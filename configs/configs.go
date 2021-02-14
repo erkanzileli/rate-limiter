@@ -5,9 +5,7 @@ import (
 	"log"
 )
 
-var (
-	AppConfig appConfig
-)
+var AppConfig appConfig
 
 func InitConfigs() {
 	AppConfig.readWithViper(true)

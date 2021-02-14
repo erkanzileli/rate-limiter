@@ -6,11 +6,19 @@ import (
 )
 
 type appConfig struct {
-	v             *viper.Viper
-	ServerAddr    string        `yaml:"serverAddr"`
-	AppServerAddr string        `yaml:"appServerAddr"`
-	Redis         *RedisConfig   `yaml:"redis"`
-	Rules         []*model.Rule `yaml:"rules"`
+	v *viper.Viper
+
+	// AppServerAddr is a url with http scheme which will used to be redirect the requests from rate-limiter.
+	AppServerAddr string `yaml:"appServerAddr"`
+
+	// ServerConfig includes server configurations.
+	ServerConfig serverConfig `yaml:"server"`
+
+	// CacheConfig includes cache configurations.
+	CacheConfig cacheConfig `yaml:"cacheConfig"`
+
+	// Rules is regexes and its limits to limit requests for 60 second periods.
+	Rules []*model.Rule `yaml:"rules"`
 }
 
 func (a *appConfig) readWithViper(shouldPanic bool) error {
@@ -19,8 +27,6 @@ func (a *appConfig) readWithViper(shouldPanic bool) error {
 		v.SetConfigFile("config.yaml")
 		a.v = v
 	}
-
-	a.v.BindEnv("VERSION")
 
 	err := a.v.ReadInConfig()
 	if err != nil {
