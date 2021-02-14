@@ -1,9 +1,9 @@
+appServerAddr: "http://localhost:8081"
 server:
   addr: ":8080"
   readTimeout: 1000
   writeTimeout: 1000
-appServerAddr: "http://localhost:8081"
-cacheConfig:
+cache:
   inMemory: true
   redis:
     addr: localhost:6379
@@ -11,7 +11,9 @@ cacheConfig:
     password: ""
     db: 0
 rules:
-  - pattern: "/xyz"
+  - pattern: "GET_/xyz.*"
     limit: 3
+  - pattern: "/xyz/a"
+    limit: 5
   - pattern: "/abc"
     limit: 4

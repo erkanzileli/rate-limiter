@@ -3,15 +3,22 @@ package configs
 type cacheConfig struct {
 	// InMemory is a flag that represents the cache mode. If true then in-memory cache will be used.
 	// If not true then a Redis connection will be open with specified Redis configs.
-	InMemory bool `yaml:"inMemory"`
+	InMemory bool
 
 	// Redis includes configurations to connect a Redis as cache service.
-	Redis redisConfig `yaml:"redis"`
+	Redis redisConfig
 }
 
 type redisConfig struct {
-	Addr     string `yaml:"addr"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	DB       int    `yaml:"db"`
+	// Addr is host address of the Redis
+	Addr string
+
+	// Username is credential for connecting to Redis
+	Username string
+
+	// Password is credential for connecting to Redis
+	Password string
+
+	// DB represents Redis DB namespace
+	DB int
 }

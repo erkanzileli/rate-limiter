@@ -5,12 +5,13 @@ import (
 	"github.com/erkanzileli/rate-limiter/pkg/model"
 )
 
+// todo: future work
+// rules can be obtained from another resource
 type RateLimitRuleRepository interface {
 	GetRules() []*model.Rule
 }
 
 type repo struct {
-	rules []*model.Rule
 }
 
 func New() RateLimitRuleRepository {

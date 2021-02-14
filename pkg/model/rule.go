@@ -1,6 +1,9 @@
 package model
 
+import "regexp"
+
 type Rule struct {
-	Pattern string `yaml:"pattern"`
-	Limit   int64  `yaml:"limit"`
+	Regex   *regexp.Regexp
+	Pattern string
+	Limit   int64
 }

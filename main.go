@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/erkanzileli/rate-limiter/configs"
+	"github.com/erkanzileli/rate-limiter/pkg/handler/reverse_proxy_handler"
 	"github.com/erkanzileli/rate-limiter/pkg/repository"
 	"github.com/erkanzileli/rate-limiter/pkg/repository/in-memory-cache-repository"
 	"github.com/erkanzileli/rate-limiter/pkg/repository/rate-limit-rule-repository"
 	"github.com/erkanzileli/rate-limiter/pkg/repository/redis-cache-repository"
-	"github.com/erkanzileli/rate-limiter/pkg/reverse_proxy_handler"
 	"github.com/erkanzileli/rate-limiter/pkg/service/rate-limit-service"
 	"github.com/go-redis/redis/v8"
 	"github.com/valyala/fasthttp"
@@ -30,15 +30,15 @@ func main() {
 	server := createServer(handler.Handle)
 
 	go func() {
-		err := fasthttp.ListenAndServe(configs.AppConfig.ServerConfig.Addr, server.Handler)
+		err := fasthttp.ListenAndServe(configs.AppConfig.Server.Addr, server.Handler)
 		if err != nil {
 			panic(fmt.Errorf("server error: %+v", err))
 		}
 	}()
 
-	handleGracefulShutdown(server)
+	log.Println("Running on", configs.AppConfig.Server.Addr)
 
-	log.Println("Running on", configs.AppConfig.ServerConfig.Addr)
+	handleGracefulShutdown(server)
 }
 
 func handleGracefulShutdown(server *fasthttp.Server) {
@@ -60,20 +60,20 @@ func createServer(handler func(ctx *fasthttp.RequestCtx)) *fasthttp.Server {
 		ErrorHandler: func(ctx *fasthttp.RequestCtx, err error) {
 			log.Printf("Server error occurred %+v", err)
 		},
-		ReadTimeout:  time.Duration(configs.AppConfig.ServerConfig.ReadTimeout) * time.Millisecond,
-		WriteTimeout: time.Duration(configs.AppConfig.ServerConfig.WriteTimeout) * time.Millisecond,
+		ReadTimeout:  time.Duration(configs.AppConfig.Server.ReadTimeout) * time.Millisecond,
+		WriteTimeout: time.Duration(configs.AppConfig.Server.WriteTimeout) * time.Millisecond,
 	}
 }
 
 func createCacheRepository() repository.CacheRepository {
-	if configs.AppConfig.CacheConfig.InMemory {
+	if configs.AppConfig.Cache.InMemory {
 		return in_memory_cache_repository.New()
 	}
 	redisClientOptions := redis.Options{
-		Addr:     configs.AppConfig.CacheConfig.Redis.Addr,
-		Username: configs.AppConfig.CacheConfig.Redis.Username,
-		Password: configs.AppConfig.CacheConfig.Redis.Password,
-		DB:       configs.AppConfig.CacheConfig.Redis.DB,
+		Addr:     configs.AppConfig.Cache.Redis.Addr,
+		Username: configs.AppConfig.Cache.Redis.Username,
+		Password: configs.AppConfig.Cache.Redis.Password,
+		DB:       configs.AppConfig.Cache.Redis.DB,
 	}
 	client := redis.NewClient(&redisClientOptions)
 	return redis_cache_repository.New(client)
