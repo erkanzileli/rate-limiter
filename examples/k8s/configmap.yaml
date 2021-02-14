@@ -1,0 +1,21 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: rate-limiter-config
+  namespace: hello-app
+data:
+  config.yaml: |
+    appServerAddr: "http://127.0.0.1:8081"
+    server:
+      addr: ":8080"
+      readTimeout: 1000
+      writeTimeout: 1000
+    cache:
+      inMemory: true
+    rules:
+      - pattern: "GET /xyz.*"
+        limit: 3
+      - pattern: "/xyz/a"
+        limit: 5
+      - pattern: "/abc"
+        limit: 4

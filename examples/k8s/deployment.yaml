@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-app-deployment
+  namespace: hello-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-app
+  template:
+    metadata:
+      labels:
+        app: hello-app
+    spec:
+      volumes:
+        - name: rate-limiter-config
+          configMap:
+            name: rate-limiter-config
+      containers:
+        - name: hello-app
+          image: erkanzileli/hello-app:latest
+          resources:
+            limits:
+              cpu: 100m
+              memory: 50Mi
+            requests:
+              cpu: 100m
+              memory: 50Mi
+        - name: rate-limiter
+          image: erkanzileli/rate-limiter:latest
+          imagePullPolicy: Always
+          command: ["/app/rate-limiter", "--config-file=/config/config.yaml"]
+          volumeMounts:
+            - name: rate-limiter-config
+              readOnly: true
+              mountPath: /config
+          resources:
+            limits:
+              cpu: 100m
+              memory: 50Mi
+            requests:
+              cpu: 100m
+              memory: 50Mi

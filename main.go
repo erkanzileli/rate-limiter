@@ -20,16 +20,11 @@ import (
 )
 
 var (
-	configFilePath = flag.String("config-file", "", "Config file path")
+	configFilePath = flag.String("config-file", "config.yaml", "Config file path")
 )
 
 func init() {
 	flag.Parse()
-
-	if len(*configFilePath) == 0 {
-		log.Fatalln("Config file path is required!")
-	}
-
 	configs.InitConfigs(*configFilePath)
 }
 
