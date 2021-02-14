@@ -7,7 +7,7 @@ class QuickstartUser(HttpUser):
     @task
     def unlimited_endpoint(self):
         self.client.get("/packages")
-
-    @task
-    def limited_endpoint(self):
-        self.client.get("/xyz")
+#
+#     @task
+#     def limited_endpoint(self):
+#         self.client.get("/xyz")
