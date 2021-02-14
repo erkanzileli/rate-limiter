@@ -3,9 +3,9 @@ package rate_limit_service
 import (
 	"context"
 	"fmt"
+	"github.com/erkanzileli/rate-limiter/pkg/repository"
+	"github.com/erkanzileli/rate-limiter/pkg/repository/rate-limit-rule-repository"
 	"log"
-	"rate-limiter/pkg/repository"
-	"rate-limiter/pkg/repository/rate-limit-rule-repository"
 	"regexp"
 	"time"
 )

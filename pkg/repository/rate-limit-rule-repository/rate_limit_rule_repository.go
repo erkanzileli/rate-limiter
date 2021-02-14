@@ -1,8 +1,8 @@
 package rate_limit_rule_repository
 
 import (
-	"rate-limiter/configs"
-	"rate-limiter/pkg/model"
+	"github.com/erkanzileli/rate-limiter/configs"
+	"github.com/erkanzileli/rate-limiter/pkg/model"
 )
 
 type RateLimitRuleRepository interface {

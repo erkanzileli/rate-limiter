@@ -2,10 +2,10 @@ package reverse_proxy_handler
 
 import (
 	"fmt"
+	"github.com/erkanzileli/rate-limiter/configs"
+	"github.com/erkanzileli/rate-limiter/pkg/service/rate-limit-service"
 	"github.com/valyala/fasthttp"
 	"log"
-	"rate-limiter/configs"
-	"rate-limiter/pkg/service/rate-limit-service"
 )
 
 const (

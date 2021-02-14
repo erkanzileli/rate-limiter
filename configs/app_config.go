@@ -2,7 +2,7 @@ package configs
 
 import (
 	"github.com/spf13/viper"
-	"rate-limiter/pkg/model"
+	"github.com/erkanzileli/rate-limiter/pkg/model"
 )
 
 type appConfig struct {

@@ -1,4 +1,4 @@
-module rate-limiter
+module github.com/erkanzileli/rate-limiter
 
 go 1.14
 

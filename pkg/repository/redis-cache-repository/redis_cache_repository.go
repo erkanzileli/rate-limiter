@@ -2,8 +2,8 @@ package redis_cache_repository
 
 import (
 	"context"
+	"github.com/erkanzileli/rate-limiter/pkg/repository"
 	"github.com/go-redis/redis/v8"
-	"rate-limiter/pkg/repository"
 )
 
 type repo struct {

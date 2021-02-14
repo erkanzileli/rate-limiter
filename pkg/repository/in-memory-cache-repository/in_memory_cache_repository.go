@@ -3,7 +3,7 @@ package in_memory_cache_repository
 import (
 	"context"
 	"github.com/dgraph-io/ristretto"
-	"rate-limiter/pkg/repository"
+	"github.com/erkanzileli/rate-limiter/pkg/repository"
 )
 
 type repo struct {
