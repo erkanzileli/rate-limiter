@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/erkanzileli/rate-limiter/configs"
 	"github.com/erkanzileli/rate-limiter/pkg/handler/reverse_proxy_handler"
@@ -18,8 +19,18 @@ import (
 	"time"
 )
 
+var (
+	configFilePath = flag.String("config-file", "", "Config file path")
+)
+
 func init() {
-	configs.InitConfigs()
+	flag.Parse()
+
+	if len(*configFilePath) == 0 {
+		log.Fatalln("Config file path is required!")
+	}
+
+	configs.InitConfigs(*configFilePath)
 }
 
 func main() {

@@ -4,7 +4,6 @@ import (
 	"github.com/erkanzileli/rate-limiter/pkg/model"
 	"github.com/spf13/viper"
 	"log"
-	"os"
 	"regexp"
 )
 
@@ -27,16 +26,14 @@ type appConfig struct {
 func (a *appConfig) readWithViper(shouldPanic bool) error {
 	if a.v == nil {
 		v := viper.New()
-		v.AddConfigPath("./")
-		v.SetConfigName("config")
-		v.SetConfigType("yaml")
+		v.SetConfigFile(configFilePath)
 		a.v = v
 	}
 
 	err := a.v.ReadInConfig()
 	if err != nil {
 		if shouldPanic {
-			panic(err)
+			log.Fatalf("config read error: %+v", err)
 		}
 		return err
 	}
@@ -44,15 +41,13 @@ func (a *appConfig) readWithViper(shouldPanic bool) error {
 	err = a.v.Unmarshal(&AppConfig)
 	if err != nil {
 		if shouldPanic {
-			panic(err)
+			log.Fatalf("config unmarshall error: %+v", err)
 		}
 		return err
 	}
 
 	a.Rules = compileRules(a.Rules)
 
-	log.Printf("%+v", a.Server)
-	os.Exit(0)
 	return nil
 }
 

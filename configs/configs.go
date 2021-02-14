@@ -5,9 +5,13 @@ import (
 	"log"
 )
 
-var AppConfig appConfig
+var (
+	AppConfig      appConfig
+	configFilePath string
+)
 
-func InitConfigs() {
+func InitConfigs(configPath string) {
+	configFilePath = configPath
 	AppConfig.readWithViper(true)
 	AppConfig.v.WatchConfig()
 	AppConfig.v.OnConfigChange(func(in fsnotify.Event) {
