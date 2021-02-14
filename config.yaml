@@ -11,7 +11,7 @@ cache:
     password: ""
     db: 0
 rules:
-  - pattern: "GET_/xyz.*"
+  - pattern: "GET /xyz.*"
     limit: 3
   - pattern: "/xyz/a"
     limit: 5
