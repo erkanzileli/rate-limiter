@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/dgraph-io/ristretto"
 	"github.com/erkanzileli/rate-limiter/pkg/repository"
+	"time"
 )
 
 type repo struct {
@@ -12,9 +13,9 @@ type repo struct {
 
 func New() repository.CacheRepository {
 	cache, err := ristretto.NewCache(&ristretto.Config{
-		NumCounters: 1e7,     // number of keys to track frequency of (10M).
-		MaxCost:     1 << 30, // maximum cost of cache (1GB).
-		BufferItems: 64,      // number of keys per Get buffer.
+		NumCounters: 10 * 1024,
+		MaxCost:     1 << 20,
+		BufferItems: 64,
 	})
 	if err != nil {
 		panic(err)
@@ -26,9 +27,9 @@ func New() repository.CacheRepository {
 func (s *repo) Increment(ctx context.Context, key interface{}) (int64, error) {
 	if value, ok := s.cache.Get(key); ok {
 		newValue := value.(int64) + 1
-		s.cache.Set(key, newValue, 1)
+		s.cache.SetWithTTL(key, newValue, 1, time.Minute*2)
 		return newValue, nil
 	}
-	s.cache.Set(key, int64(1), 1)
+	s.cache.SetWithTTL(key, int64(1), 1, time.Minute*2)
 	return 1, nil
 }
