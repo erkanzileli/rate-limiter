@@ -2,6 +2,7 @@ package configs
 
 import (
 	"github.com/erkanzileli/rate-limiter/pkg/model"
+	rate_limit_rule_repository "github.com/erkanzileli/rate-limiter/pkg/repository/rate-limit-rule-repository"
 	"github.com/spf13/viper"
 	"log"
 	"regexp"
@@ -13,14 +14,16 @@ type appConfig struct {
 	// AppServerAddr is a url with http scheme which will used to be redirect the requests from rate-limiter.
 	AppServerAddr string
 
-	// Server includes server configurations.
+	// Server contains server configurations.
 	Server serverConfig
 
-	// Cache includes cache configurations.
+	// Cache contains cache configurations.
 	Cache cacheConfig
 
-	// Rules is regexes and its limits to limit requests for 60 second periods.
-	Rules []*model.Rule
+	// Algorithm contains algorithm options. Not required.
+	Algorithm algorithmConfig
+
+	Rules []*ruleConfig
 }
 
 func (a *appConfig) readWithViper(shouldPanic bool) error {
@@ -46,13 +49,13 @@ func (a *appConfig) readWithViper(shouldPanic bool) error {
 		return err
 	}
 
-	a.Rules = compileRules(a.Rules)
+	rate_limit_rule_repository.Rules = compileRules(a.Rules)
 
 	return nil
 }
 
 // compileRules compiles given rule's patterns and filters non-valid patterns
-func compileRules(rules []*model.Rule) []*model.Rule {
+func compileRules(rules []*ruleConfig) []*model.Rule {
 	tempRules := make([]*model.Rule, 0)
 
 	for _, rule := range rules {
@@ -62,8 +65,12 @@ func compileRules(rules []*model.Rule) []*model.Rule {
 			continue
 		}
 
-		rule.Regex = regex
-		tempRules = append(tempRules, rule)
+		tempRules = append(tempRules, &model.Rule{
+			Scope:   rule.Scope,
+			Pattern: rule.Pattern,
+			Limit:   rule.Limit,
+			Regex:   regex,
+		})
 	}
 
 	return tempRules

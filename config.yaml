@@ -10,10 +10,21 @@ cache:
     username: ""
     password: ""
     db: 0
+algorithm:
+  name: fixed-window-count
+  options:
+    # Fixed Window Count Options
+    windowLengthInSeconds: 60
+    # Another Algorithm Options..
+defaultRuleScope: path # todo ?
 rules:
-  - pattern: "GET /xyz.*"
+  - scope: rule
+    pattern: "GET /xyz.*"
     limit: 3
-  - pattern: "/xyz/a"
+  - scope: path
+    pattern: "/xyz/a"
     limit: 5
-  - pattern: "/abc"
+  - scope: path
+    pattern: "/abc"
+    windowLengthInSeconds: 30
     limit: 4
