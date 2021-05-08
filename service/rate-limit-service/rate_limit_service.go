@@ -3,9 +3,9 @@ package rate_limit_service
 import (
 	"context"
 	"fmt"
-	model2 "github.com/erkanzileli/rate-limiter/model"
-	repository2 "github.com/erkanzileli/rate-limiter/repository"
-	rate_limit_rule_repository2 "github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
+	"github.com/erkanzileli/rate-limiter/model"
+	"github.com/erkanzileli/rate-limiter/repository"
+	"github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
 	"log"
 	"time"
 )
@@ -20,13 +20,13 @@ type RateLimitService interface {
 }
 
 type service struct {
-	cacheRepository repository2.CacheRepository
-	ruleRepository  rate_limit_rule_repository2.RateLimitRuleRepository
+	cacheRepository repository.CacheRepository
+	ruleRepository  rate_limit_rule_repository.RateLimitRuleRepository
 }
 
 func New(
-	cacheRepository repository2.CacheRepository,
-	ruleRepository rate_limit_rule_repository2.RateLimitRuleRepository) RateLimitService {
+	cacheRepository repository.CacheRepository,
+	ruleRepository rate_limit_rule_repository.RateLimitRuleRepository) RateLimitService {
 	return &service{cacheRepository, ruleRepository}
 }
 
@@ -58,7 +58,7 @@ func (s *service) CanProceed(ctx context.Context, method, path string) (canProce
 }
 
 // findMatchedMinimumLimitRule loops over whole rules and returns a rule that has matched with the requestHash and its limit is lowest
-func findMatchedMinimumLimitRule(rules []model2.Rule, requestHash string) (result model2.Rule, anyMatch bool) {
+func findMatchedMinimumLimitRule(rules []model.Rule, requestHash string) (result model.Rule, anyMatch bool) {
 	for _, rule := range rules {
 		if matched := rule.Regex.MatchString(requestHash); !matched {
 			continue

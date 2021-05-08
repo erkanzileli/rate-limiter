@@ -3,7 +3,7 @@ package rate_limit_service_test
 import (
 	"context"
 	"fmt"
-	model2 "github.com/erkanzileli/rate-limiter/model"
+	"github.com/erkanzileli/rate-limiter/model"
 	testifyAssert "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"regexp"
@@ -23,7 +23,7 @@ func (suite *Suite) Test_it_should_return_true_when_minimum_limit_rule_was_not_e
 	rulePattern2 := "PUT /users/.*/deactivate"
 	regex2, _ := regexp.Compile(rulePattern2)
 
-	rules := []model2.Rule{{rulePattern1, 10, regex1}, {rulePattern2, 5, regex2}}
+	rules := []model.Rule{{rulePattern1, 10, regex1}, {rulePattern2, 5, regex2}}
 
 	suite.ruleRepository.On("GetRules").Return(rules)
 	suite.cacheRepository.On("Increment", mock.Anything, mock.Anything).Return(5, nil)
@@ -51,7 +51,7 @@ func (suite *Suite) Test_it_should_return_false_when_minimum_limit_rule_was_exce
 
 	rulePattern := "PUT /users.*"
 	regex, _ := regexp.Compile(rulePattern)
-	rules := []model2.Rule{{rulePattern, 5, regex}}
+	rules := []model.Rule{{rulePattern, 5, regex}}
 
 	suite.ruleRepository.On("GetRules").Return(rules)
 	suite.cacheRepository.On("Increment", mock.Anything, mock.Anything).Return(6, nil)
@@ -76,7 +76,7 @@ func (suite *Suite) Test_it_should_return_true_when_cache_repository_fails() {
 
 	rulePattern := "PUT /users.*"
 	regex, _ := regexp.Compile(rulePattern)
-	rules := []model2.Rule{{rulePattern, 5, regex}}
+	rules := []model.Rule{{rulePattern, 5, regex}}
 
 	suite.ruleRepository.On("GetRules").Return(rules)
 	suite.cacheRepository.On("Increment", mock.Anything, mock.Anything).Return(0, fmt.Errorf("cache-error"))
@@ -102,7 +102,7 @@ func (suite *Suite) Test_it_should_return_true_when_there_are_not_any_related_ru
 
 	rulePattern := "GET /users.*"
 	regex, _ := regexp.Compile(rulePattern)
-	rules := []model2.Rule{{rulePattern, 5, regex}}
+	rules := []model.Rule{{rulePattern, 5, regex}}
 
 	suite.ruleRepository.On("GetRules").Return(rules)
 

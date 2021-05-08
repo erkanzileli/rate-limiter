@@ -1,8 +1,8 @@
 package configs
 
 import (
-	model2 "github.com/erkanzileli/rate-limiter/model"
-	rate_limit_rule_repository2 "github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
+	"github.com/erkanzileli/rate-limiter/model"
+	"github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
 	"github.com/spf13/viper"
 	"log"
 	"regexp"
@@ -49,14 +49,14 @@ func (a *appConfig) readWithViper(shouldPanic bool) error {
 		return err
 	}
 
-	rate_limit_rule_repository2.Rules = compileRules(a.Rules)
+	rate_limit_rule_repository.Rules = compileRules(a.Rules)
 
 	return nil
 }
 
 // compileRules compiles given rule's patterns and filters non-valid patterns
-func compileRules(rules []ruleConfig) []model2.Rule {
-	tempRules := make([]model2.Rule, 0)
+func compileRules(rules []ruleConfig) []model.Rule {
+	tempRules := make([]model.Rule, 0)
 
 	for _, rule := range rules {
 		regex, err := regexp.Compile(rule.Pattern)
@@ -65,7 +65,7 @@ func compileRules(rules []ruleConfig) []model2.Rule {
 			continue
 		}
 
-		tempRules = append(tempRules, model2.Rule{
+		tempRules = append(tempRules, model.Rule{
 			//Scope:   rule.Scope,
 			Pattern: rule.Pattern,
 			Limit:   rule.Limit,

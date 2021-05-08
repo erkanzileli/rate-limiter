@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/erkanzileli/rate-limiter/configs"
-	rate_limit_service2 "github.com/erkanzileli/rate-limiter/service/rate-limit-service"
+	"github.com/erkanzileli/rate-limiter/service/rate-limit-service"
 	"github.com/valyala/fasthttp"
 	"log"
 	"net/http"
@@ -16,10 +16,10 @@ type ReverseProxyHandler interface {
 }
 
 type handler struct {
-	rateLimitService rate_limit_service2.RateLimitService
+	rateLimitService rate_limit_service.RateLimitService
 }
 
-func New(rateLimitService rate_limit_service2.RateLimitService) *handler {
+func New(rateLimitService rate_limit_service.RateLimitService) *handler {
 	return &handler{
 		rateLimitService: rateLimitService,
 	}
