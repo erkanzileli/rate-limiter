@@ -1,10 +1,9 @@
 package configs
 
-type ruleScope string
-
-const (
-	PathScope ruleScope = "path"
-	RuleScope ruleScope = "rule"
+import (
+	"github.com/erkanzileli/rate-limiter/model"
+	"log"
+	"regexp"
 )
 
 type ruleConfig struct {
@@ -26,11 +25,24 @@ type ruleConfig struct {
 	Limit int64
 }
 
-// IsValid is for validating given rule scope.
-func (a ruleScope) IsValid() bool {
-	switch a {
-	case PathScope, RuleScope:
-		return true
+// compileRules compiles given rule's patterns and filters non-valid patterns
+func compileRules(rules []ruleConfig) []model.Rule {
+	tempRules := make([]model.Rule, 0, len(rules))
+
+	for _, r := range rules {
+		regex, err := regexp.Compile(r.Pattern)
+		if err != nil {
+			log.Printf("error compiling rule pattern into a regexp: %+v\n", err)
+			continue
+		}
+
+		tempRules = append(tempRules, model.Rule{
+			Scope:   model.NewRuleScope(r.Scope),
+			Pattern: r.Pattern,
+			Limit:   r.Limit,
+			Regex:   regex,
+		})
 	}
-	return false
+
+	return tempRules
 }

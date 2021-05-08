@@ -1,11 +1,9 @@
 package configs
 
 import (
-	"github.com/erkanzileli/rate-limiter/model"
 	"github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
 	"github.com/spf13/viper"
 	"log"
-	"regexp"
 )
 
 type appConfig struct {
@@ -24,6 +22,8 @@ type appConfig struct {
 	Algorithm algorithmConfig
 
 	Rules []ruleConfig
+
+	DefaultRuleScope string
 }
 
 func (a *appConfig) readWithViper(shouldPanic bool) error {
@@ -52,26 +52,4 @@ func (a *appConfig) readWithViper(shouldPanic bool) error {
 	rate_limit_rule_repository.Rules = compileRules(a.Rules)
 
 	return nil
-}
-
-// compileRules compiles given rule's patterns and filters non-valid patterns
-func compileRules(rules []ruleConfig) []model.Rule {
-	tempRules := make([]model.Rule, 0)
-
-	for _, rule := range rules {
-		regex, err := regexp.Compile(rule.Pattern)
-		if err != nil {
-			log.Printf("error compiling rule pattern into a regexp: %+v\n", err)
-			continue
-		}
-
-		tempRules = append(tempRules, model.Rule{
-			//Scope:   rule.Scope,
-			Pattern: rule.Pattern,
-			Limit:   rule.Limit,
-			Regex:   regex,
-		})
-	}
-
-	return tempRules
 }

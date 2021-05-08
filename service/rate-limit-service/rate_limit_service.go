@@ -12,7 +12,7 @@ import (
 
 const (
 	requestHashFormat  = "%s %s"
-	windowedRuleFormat = "%s_%s"
+	incrementKeyFormat = "%s_%s"
 )
 
 type RateLimitService interface {
@@ -40,8 +40,8 @@ func (s *service) CanProceed(ctx context.Context, method, path string) (canProce
 		return true, nil
 	}
 
-	windowedPatternKey := fmt.Sprintf(windowedRuleFormat, matchedRule.Pattern, getTimeWindow())
-	actualUsage, err := s.cacheRepository.Increment(ctx, windowedPatternKey)
+	incrementKey := getIncrementKey(matchedRule, requestHash)
+	actualUsage, err := s.cacheRepository.Increment(ctx, incrementKey)
 
 	if err != nil {
 		log.Printf("Request can't be limited due to cache repository error: %+v\n", err)
@@ -55,6 +55,15 @@ func (s *service) CanProceed(ctx context.Context, method, path string) (canProce
 	}
 
 	return true, nil
+}
+
+// getIncrementKey decides to which key will be incremented by the rule's scope
+func getIncrementKey(rule model.Rule, requestHash string) string {
+	incrementScope := requestHash
+	if rule.IsPatternScope() {
+		incrementScope = rule.Pattern
+	}
+	return fmt.Sprintf(incrementKeyFormat, incrementScope, getTimeWindow())
 }
 
 // findMatchedMinimumLimitRule loops over whole rules and returns a rule that has matched with the requestHash and its limit is lowest

@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (suite *Suite) Test_it_should_return_true_when_minimum_limit_rule_was_not_exceeded() {
+func (suite *Suite) Test_it_should_return_true_when_minimum_limit_rule_was_not_exceeded_and_scope_is_path() {
 	t := suite.T()
 	assert := testifyAssert.New(t)
 
@@ -23,7 +23,39 @@ func (suite *Suite) Test_it_should_return_true_when_minimum_limit_rule_was_not_e
 	rulePattern2 := "PUT /users/.*/deactivate"
 	regex2, _ := regexp.Compile(rulePattern2)
 
-	rules := []model.Rule{{rulePattern1, 10, regex1}, {rulePattern2, 5, regex2}}
+	rules := []model.Rule{{model.PathScope, rulePattern1, 10, regex1}, {model.PathScope, rulePattern2, 5, regex2}}
+
+	suite.ruleRepository.On("GetRules").Return(rules)
+	suite.cacheRepository.On("Increment", mock.Anything, mock.Anything).Return(5, nil)
+
+	// When
+	canProceed, err := suite.service.CanProceed(context.Background(), method, requestPath)
+
+	// Then
+	assert.Nil(err)
+	assert.True(canProceed)
+
+	suite.ruleRepository.AssertExpectations(t)
+	suite.cacheRepository.AssertExpectations(t)
+
+	capturedIncrementRequest := suite.cacheRepository.Calls[0].Arguments.String(1)
+	assert.True(strings.HasPrefix(capturedIncrementRequest, "PUT /users/123/deactivate"))
+}
+
+func (suite *Suite) Test_it_should_return_true_when_minimum_limit_rule_was_not_exceeded_and_scope_is_pattern() {
+	t := suite.T()
+	assert := testifyAssert.New(t)
+
+	// Given
+	method, requestPath := "PUT", "/users/123/deactivate"
+
+	rulePattern1 := "PUT /users.*"
+	regex1, _ := regexp.Compile(rulePattern1)
+
+	rulePattern2 := "PUT /users/.*/deactivate"
+	regex2, _ := regexp.Compile(rulePattern2)
+
+	rules := []model.Rule{{model.PathScope, rulePattern1, 10, regex1}, {model.PatternScope, rulePattern2, 5, regex2}}
 
 	suite.ruleRepository.On("GetRules").Return(rules)
 	suite.cacheRepository.On("Increment", mock.Anything, mock.Anything).Return(5, nil)
@@ -51,7 +83,7 @@ func (suite *Suite) Test_it_should_return_false_when_minimum_limit_rule_was_exce
 
 	rulePattern := "PUT /users.*"
 	regex, _ := regexp.Compile(rulePattern)
-	rules := []model.Rule{{rulePattern, 5, regex}}
+	rules := []model.Rule{{model.PathScope, rulePattern, 5, regex}}
 
 	suite.ruleRepository.On("GetRules").Return(rules)
 	suite.cacheRepository.On("Increment", mock.Anything, mock.Anything).Return(6, nil)
@@ -76,7 +108,7 @@ func (suite *Suite) Test_it_should_return_true_when_cache_repository_fails() {
 
 	rulePattern := "PUT /users.*"
 	regex, _ := regexp.Compile(rulePattern)
-	rules := []model.Rule{{rulePattern, 5, regex}}
+	rules := []model.Rule{{model.PathScope, rulePattern, 5, regex}}
 
 	suite.ruleRepository.On("GetRules").Return(rules)
 	suite.cacheRepository.On("Increment", mock.Anything, mock.Anything).Return(0, fmt.Errorf("cache-error"))
@@ -102,7 +134,7 @@ func (suite *Suite) Test_it_should_return_true_when_there_are_not_any_related_ru
 
 	rulePattern := "GET /users.*"
 	regex, _ := regexp.Compile(rulePattern)
-	rules := []model.Rule{{rulePattern, 5, regex}}
+	rules := []model.Rule{{model.PathScope, rulePattern, 5, regex}}
 
 	suite.ruleRepository.On("GetRules").Return(rules)
 

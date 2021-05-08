@@ -15,7 +15,7 @@ type algorithmConfig struct {
 }
 
 type algorithmOptionsConfig struct {
-	// WindowLengthInSeconds is for FixedWindowCount. Default is 60 seconds.
+	// WindowLengthInSeconds is for FixedWindowCount. Default is 60.
 	WindowLengthInSeconds int64
 }
 
