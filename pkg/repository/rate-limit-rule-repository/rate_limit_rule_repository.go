@@ -4,10 +4,10 @@ import (
 	"github.com/erkanzileli/rate-limiter/pkg/model"
 )
 
-var Rules []*model.Rule
+var Rules []model.Rule
 
 type RateLimitRuleRepository interface {
-	GetRules() []*model.Rule
+	GetRules() []model.Rule
 }
 
 type repo struct {
@@ -17,6 +17,6 @@ func New() RateLimitRuleRepository {
 	return &repo{}
 }
 
-func (r *repo) GetRules() []*model.Rule {
+func (r *repo) GetRules() []model.Rule {
 	return Rules
 }

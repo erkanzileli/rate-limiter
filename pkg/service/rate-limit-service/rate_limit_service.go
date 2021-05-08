@@ -32,15 +32,15 @@ func New(
 
 // CanProceed takes key and tries to found a pattern that matching with given key.
 // When it found then it compares pattern value with actualUsage.
-func (s *service) CanProceed(ctx context.Context, method, uri string) (bool, error) {
-	requestHash := fmt.Sprintf(requestHashFormat, method, uri)
-	matchedMinimumLimitRule := findMatchedMinimumLimitRule(s.ruleRepository.GetRules(), requestHash)
+func (s *service) CanProceed(ctx context.Context, method, path string) (canProceed bool, err error) {
+	requestHash := fmt.Sprintf(requestHashFormat, method, path)
+	matchedRule, anyMatch := findMatchedMinimumLimitRule(s.ruleRepository.GetRules(), requestHash)
 
-	if matchedMinimumLimitRule == nil {
+	if !anyMatch {
 		return true, nil
 	}
 
-	windowedPatternKey := fmt.Sprintf(windowedRuleFormat, matchedMinimumLimitRule.Pattern, getTimeWindow())
+	windowedPatternKey := fmt.Sprintf(windowedRuleFormat, matchedRule.Pattern, getTimeWindow())
 	actualUsage, err := s.cacheRepository.Increment(ctx, windowedPatternKey)
 
 	if err != nil {
@@ -48,9 +48,9 @@ func (s *service) CanProceed(ctx context.Context, method, uri string) (bool, err
 		return true, err
 	}
 
-	if actualUsage > matchedMinimumLimitRule.Limit {
+	if actualUsage > matchedRule.Limit {
 		log.Printf("Key %s cannot be processed due to pattern %s with limit %d was exceeded and actual is %d\n",
-			requestHash, matchedMinimumLimitRule.Pattern, matchedMinimumLimitRule.Limit, actualUsage)
+			requestHash, matchedRule.Pattern, matchedRule.Limit, actualUsage)
 		return false, err
 	}
 
@@ -58,16 +58,18 @@ func (s *service) CanProceed(ctx context.Context, method, uri string) (bool, err
 }
 
 // findMatchedMinimumLimitRule loops over whole rules and returns a rule that has matched with the requestHash and its limit is lowest
-func findMatchedMinimumLimitRule(rules []*model.Rule, requestHash string) (matchedMinimumLimitRule *model.Rule) {
+func findMatchedMinimumLimitRule(rules []model.Rule, requestHash string) (result model.Rule, anyMatch bool) {
 	for _, rule := range rules {
-		if matched := rule.Regex.MatchString(requestHash); matched {
-			if matchedMinimumLimitRule == nil {
-				matchedMinimumLimitRule = rule
-				continue
-			}
-			if rule.Limit < matchedMinimumLimitRule.Limit {
-				matchedMinimumLimitRule = rule
-			}
+		if matched := rule.Regex.MatchString(requestHash); !matched {
+			continue
+		}
+		if !anyMatch {
+			anyMatch = true
+			result = rule
+			continue
+		}
+		if rule.Limit < result.Limit {
+			result = rule
 		}
 	}
 	return

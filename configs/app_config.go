@@ -23,7 +23,7 @@ type appConfig struct {
 	// Algorithm contains algorithm options. Not required.
 	Algorithm algorithmConfig
 
-	Rules []*ruleConfig
+	Rules []ruleConfig
 }
 
 func (a *appConfig) readWithViper(shouldPanic bool) error {
@@ -55,8 +55,8 @@ func (a *appConfig) readWithViper(shouldPanic bool) error {
 }
 
 // compileRules compiles given rule's patterns and filters non-valid patterns
-func compileRules(rules []*ruleConfig) []*model.Rule {
-	tempRules := make([]*model.Rule, 0)
+func compileRules(rules []ruleConfig) []model.Rule {
+	tempRules := make([]model.Rule, 0)
 
 	for _, rule := range rules {
 		regex, err := regexp.Compile(rule.Pattern)
@@ -65,8 +65,8 @@ func compileRules(rules []*ruleConfig) []*model.Rule {
 			continue
 		}
 
-		tempRules = append(tempRules, &model.Rule{
-			Scope:   rule.Scope,
+		tempRules = append(tempRules, model.Rule{
+			//Scope:   rule.Scope,
 			Pattern: rule.Pattern,
 			Limit:   rule.Limit,
 			Regex:   regex,

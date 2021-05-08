@@ -6,10 +6,7 @@ import (
 	"github.com/erkanzileli/rate-limiter/pkg/service/rate-limit-service"
 	"github.com/valyala/fasthttp"
 	"log"
-)
-
-const (
-	tooManyRequests = "Too Many Requests!"
+	"net/http"
 )
 
 type handler struct {
@@ -32,8 +29,7 @@ func (h *handler) Handle(ctx *fasthttp.RequestCtx) {
 	if ok, err := h.rateLimitService.CanProceed(ctx, method, uri); err != nil {
 		log.Printf("Rate limit skipping due to error: %+v", err)
 	} else if !ok {
-		ctx.Response.SetBody([]byte(tooManyRequests))
-		ctx.Response.SetStatusCode(429)
+		ctx.Response.SetStatusCode(http.StatusTooManyRequests)
 		log.Println("Too many requests!")
 		return
 	}
