@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/erkanzileli/rate-limiter/configs"
-	"github.com/erkanzileli/rate-limiter/pkg/handler/reverse_proxy_handler"
+	"github.com/erkanzileli/rate-limiter/pkg/handler"
 	"github.com/erkanzileli/rate-limiter/pkg/repository"
 	"github.com/erkanzileli/rate-limiter/pkg/repository/in-memory-cache-repository"
 	"github.com/erkanzileli/rate-limiter/pkg/repository/rate-limit-rule-repository"
@@ -32,8 +32,8 @@ func main() {
 	cacheRepository := createCacheRepository()
 	ruleRepository := rate_limit_rule_repository.New()
 	rateLimitService := rate_limit_service.New(cacheRepository, ruleRepository)
-	handler := reverse_proxy_handler.New(rateLimitService)
-	server := createServer(handler.Handle)
+	h := handler.New(rateLimitService)
+	server := createServer(h.Handle)
 
 	go func() {
 		err := fasthttp.ListenAndServe(configs.AppConfig.Server.Addr, server.Handler)

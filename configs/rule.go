@@ -9,6 +9,7 @@ const (
 
 type ruleConfig struct {
 	// Scope specifies limiting indicator for a rule.
+	//
 	// If scope is PathScope;
 	// Each requests that matches with the rule pattern will be limited according to their request paths.
 	// That means all different request paths that matches the rule will increment their usage.

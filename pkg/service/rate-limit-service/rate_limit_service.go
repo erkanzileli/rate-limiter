@@ -16,7 +16,7 @@ const (
 )
 
 type RateLimitService interface {
-	CanProceed(ctx context.Context, method, uri string) (bool, error)
+	CanProceed(ctx context.Context, method, path string) (bool, error)
 }
 
 type service struct {
