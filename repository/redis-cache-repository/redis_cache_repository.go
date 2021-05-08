@@ -3,6 +3,7 @@ package redis_cache_repository
 import (
 	"context"
 	"github.com/erkanzileli/rate-limiter/repository"
+	"github.com/erkanzileli/rate-limiter/tracing/new-relic"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -17,7 +18,9 @@ func New(redisClient *redis.Client) *repo {
 }
 
 func (r *repo) Increment(ctx context.Context, key interface{}) (int64, error) {
-	var incr *redis.IntCmd
+	defer new_relic.StartSegment(ctx)
+
+	incr := new(redis.IntCmd)
 
 	_, err := r.redisClient.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		key := key.(string)

@@ -10,6 +10,7 @@ import (
 	"github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
 	"github.com/erkanzileli/rate-limiter/repository/redis-cache-repository"
 	"github.com/erkanzileli/rate-limiter/service/rate-limit-service"
+	new_relic "github.com/erkanzileli/rate-limiter/tracing/new-relic"
 	"github.com/go-redis/redis/v8"
 	"github.com/valyala/fasthttp"
 	"log"
@@ -26,6 +27,11 @@ var (
 func init() {
 	flag.Parse()
 	configs.InitConfigs(*configFilePath)
+
+	err := new_relic.CreateAgent()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {

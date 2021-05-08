@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/erkanzileli/rate-limiter/configs"
 	"github.com/erkanzileli/rate-limiter/service/rate-limit-service"
+	"github.com/erkanzileli/rate-limiter/tracing/new-relic"
 	"github.com/valyala/fasthttp"
 	"log"
 	"net/http"
@@ -28,6 +29,8 @@ func New(rateLimitService rate_limit_service.RateLimitService) *handler {
 func (h *handler) Handle(reqCtx *fasthttp.RequestCtx) {
 	method, path := string(reqCtx.Method()), string(reqCtx.Request.URI().Path())
 	ctx := context.Background()
+	ctx, endTxn := new_relic.StartTransaction(ctx, method+" "+path)
+	defer endTxn()
 
 	log.Printf("Received %s %s\n", method, path)
 
@@ -39,7 +42,7 @@ func (h *handler) Handle(reqCtx *fasthttp.RequestCtx) {
 		return
 	}
 
-	redirectResp, err := redirect(reqCtx)
+	redirectResp, err := redirect(ctx, reqCtx)
 	if err != nil {
 		reqCtx.Response.SetBody([]byte(err.Error()))
 		reqCtx.Response.SetStatusCode(http.StatusInternalServerError)
@@ -50,10 +53,12 @@ func (h *handler) Handle(reqCtx *fasthttp.RequestCtx) {
 	}
 
 	defer fasthttp.ReleaseResponse(redirectResp)
-	passResponse(reqCtx, redirectResp)
+	passResponse(ctx, reqCtx, redirectResp)
 }
 
-func redirect(reqCtx *fasthttp.RequestCtx) (*fasthttp.Response, error) {
+func redirect(ctx context.Context, reqCtx *fasthttp.RequestCtx) (*fasthttp.Response, error) {
+	defer new_relic.StartSegment(ctx)
+
 	method, routingUrl := string(reqCtx.Method()), getRoutingUrl(string(reqCtx.Request.URI().Path()))
 
 	log.Printf("Redirecting to -> %s\n", routingUrl)
@@ -78,7 +83,9 @@ func redirect(reqCtx *fasthttp.RequestCtx) (*fasthttp.Response, error) {
 	return redirectResp, nil
 }
 
-func passResponse(reqCtx *fasthttp.RequestCtx, resp *fasthttp.Response) {
+func passResponse(ctx context.Context, reqCtx *fasthttp.RequestCtx, resp *fasthttp.Response) {
+	defer new_relic.StartSegment(ctx)
+
 	reqCtx.Response.SetBody(resp.Body())
 	reqCtx.Response.SetStatusCode(resp.StatusCode())
 	resp.Header.VisitAll(func(key, value []byte) {

@@ -6,6 +6,7 @@ import (
 	"github.com/erkanzileli/rate-limiter/model"
 	"github.com/erkanzileli/rate-limiter/repository"
 	"github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
+	new_relic "github.com/erkanzileli/rate-limiter/tracing/new-relic"
 	"log"
 	"time"
 )
@@ -33,6 +34,8 @@ func New(
 // CanProceed takes key and tries to found a pattern that matching with given key.
 // When it found then it compares pattern value with actualUsage.
 func (s *service) CanProceed(ctx context.Context, method, path string) (canProceed bool, err error) {
+	defer new_relic.StartSegment(ctx)
+
 	requestHash := fmt.Sprintf(requestHashFormat, method, path)
 	matchedRule, anyMatch := findMatchedMinimumLimitRule(s.ruleRepository.GetRules(), requestHash)
 

@@ -21,9 +21,13 @@ type appConfig struct {
 	// Algorithm contains algorithm options. Not required.
 	Algorithm algorithmConfig
 
+	// Rules are basically rate limiting rules.
 	Rules []ruleConfig
 
 	DefaultRuleScope string
+
+	// Tracing contains tracing options. Only NewRelic is supported for now.
+	Tracing tracingConfig
 }
 
 func (a *appConfig) readWithViper(shouldPanic bool) error {
@@ -50,6 +54,8 @@ func (a *appConfig) readWithViper(shouldPanic bool) error {
 	}
 
 	rate_limit_rule_repository.Rules = compileRules(a.Rules)
+
+	a.Tracing.validateProvider()
 
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/dgraph-io/ristretto"
 	"github.com/erkanzileli/rate-limiter/repository"
+	"github.com/erkanzileli/rate-limiter/tracing/new-relic"
 )
 
 type repo struct {
@@ -24,6 +25,8 @@ func New() *repo {
 }
 
 func (s *repo) Increment(ctx context.Context, key interface{}) (int64, error) {
+	defer new_relic.StartSegment(ctx)
+
 	if value, ok := s.cache.Get(key); ok {
 		newValue := value.(int64) + 1
 		s.cache.SetWithTTL(key, newValue, 1, repository.IncrementKeyTTL)
