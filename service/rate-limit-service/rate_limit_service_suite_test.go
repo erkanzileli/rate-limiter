@@ -2,10 +2,10 @@ package rate_limit_service_test
 
 import (
 	"context"
-	"github.com/erkanzileli/rate-limiter/pkg/model"
-	"github.com/erkanzileli/rate-limiter/pkg/repository"
-	"github.com/erkanzileli/rate-limiter/pkg/repository/rate-limit-rule-repository"
-	rate_limit_service "github.com/erkanzileli/rate-limiter/pkg/service/rate-limit-service"
+	model2 "github.com/erkanzileli/rate-limiter/model"
+	repository2 "github.com/erkanzileli/rate-limiter/repository"
+	rate_limit_rule_repository2 "github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
+	rate_limit_service2 "github.com/erkanzileli/rate-limiter/service/rate-limit-service"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
@@ -15,7 +15,7 @@ type Suite struct {
 	suite.Suite
 	cacheRepository *cacheRepositoryMock
 	ruleRepository  *ruleRepositoryMock
-	service         rate_limit_service.RateLimitService
+	service         rate_limit_service2.RateLimitService
 }
 
 func Test(t *testing.T) {
@@ -25,12 +25,12 @@ func Test(t *testing.T) {
 func (suite *Suite) SetupTest() {
 	suite.cacheRepository = &cacheRepositoryMock{}
 	suite.ruleRepository = &ruleRepositoryMock{}
-	suite.service = rate_limit_service.New(suite.cacheRepository, suite.ruleRepository)
+	suite.service = rate_limit_service2.New(suite.cacheRepository, suite.ruleRepository)
 }
 
 type cacheRepositoryMock struct {
 	mock.Mock
-	repository.CacheRepository
+	repository2.CacheRepository
 }
 
 func (c *cacheRepositoryMock) Increment(ctx context.Context, key interface{}) (int64, error) {
@@ -40,14 +40,14 @@ func (c *cacheRepositoryMock) Increment(ctx context.Context, key interface{}) (i
 
 type ruleRepositoryMock struct {
 	mock.Mock
-	rate_limit_rule_repository.RateLimitRuleRepository
+	rate_limit_rule_repository2.RateLimitRuleRepository
 }
 
-func (r *ruleRepositoryMock) GetRules() []model.Rule {
+func (r *ruleRepositoryMock) GetRules() []model2.Rule {
 	args := r.Called()
 	rules := args.Get(0)
 	if rules != nil {
-		return rules.([]model.Rule)
+		return rules.([]model2.Rule)
 	}
-	return []model.Rule{}
+	return []model2.Rule{}
 }

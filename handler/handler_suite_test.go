@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/erkanzileli/rate-limiter/configs"
-	"github.com/erkanzileli/rate-limiter/pkg/handler"
-	rate_limit_service "github.com/erkanzileli/rate-limiter/pkg/service/rate-limit-service"
+	handler2 "github.com/erkanzileli/rate-limiter/handler"
+	rate_limit_service2 "github.com/erkanzileli/rate-limiter/service/rate-limit-service"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"github.com/valyala/fasthttp"
@@ -28,7 +28,7 @@ type Suite struct {
 	rateLimiterServer *fasthttp.Server
 	httpClient        *http.Client
 	rateLimitService  *rateLimitServiceMock
-	handler           handler.ReverseProxyHandler
+	handler           handler2.ReverseProxyHandler
 }
 
 func Test(t *testing.T) {
@@ -59,13 +59,13 @@ func (suite *Suite) SetupTest() {
 
 	suite.httpClient = &http.Client{}
 	suite.rateLimitService = &rateLimitServiceMock{}
-	suite.handler = handler.New(suite.rateLimitService)
+	suite.handler = handler2.New(suite.rateLimitService)
 	suite.rateLimiterServer.Handler = suite.handler.Handle
 }
 
 type rateLimitServiceMock struct {
 	mock.Mock
-	rate_limit_service.RateLimitService
+	rate_limit_service2.RateLimitService
 }
 
 func (r *rateLimitServiceMock) CanProceed(ctx context.Context, method, path string) (bool, error) {
