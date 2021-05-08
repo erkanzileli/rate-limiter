@@ -1,5 +1,7 @@
 package configs
 
+import "log"
+
 const (
 	newRelicProvider = "new-relic"
 )
@@ -35,5 +37,6 @@ func (t *tracingConfig) validateProvider() {
 	case newRelicProvider:
 	default:
 		t.Enabled = false
+		log.Println("Tracing is set as disabled due to invalid provider name:", t.Provider)
 	}
 }
