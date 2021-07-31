@@ -3,5 +3,5 @@ package repository
 import "time"
 
 const (
-	IncrementKeyTTL = 2 * time.Minute
+	IncrementKeyTTL = 1 * time.Minute
 )

@@ -2,16 +2,17 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/erkanzileli/rate-limiter/badge.svg)](https://coveralls.io/github/erkanzileli/rate-limiter)
 
+## Motivation
+
+When I started this I didn't know that there are a lot of rate-limiting projects(commercial, personal). I just wanted to
+solve a situation with my code and I learned something while making this project.
+
 ## Long story short
 
 This is an app that you should put in front of your app to limiting incoming HTTP traffic. Works on L7 and acts as a
 reverse proxy. I'm sure there are a lot of similar projects but this project is exactly for my need.
 
 > Note: Putting in front of means that you should redirect the incoming traffic to this app instead of your app. This app will redirect the traffic to your app if it should.
-
-## Motivation
-
-At the end this app is an HTTP server. Acts as L7 single host reverse proxy.
 
 ## How to configure
 
@@ -36,17 +37,10 @@ cache:
     username: ""
     password: ""
     db: 0
-algorithm:
-  name: fixed-window-count
-  options:
-    # Fixed Window Count Options
-    windowLengthInSeconds: 60
-    # Another Algorithm Options..
-defaultRuleScope: path # todo ?
+defaultRuleScope: path
 rules:
   - scope: path
     pattern: GET /users/4/addresses
-    windowLengthInSeconds: 30
     limit: 4
 tracing:
   enabled: false
@@ -77,13 +71,14 @@ In the `cache` object you specify whether you want to use in-memory cache or Red
 thing you have to do is set `cache.inMemory` field as `true`. However, if you use Redis than you only have to specify
 the Redis settings.
 
+<!--
 In the `algorithm` object you specify which algorithm you want to use. Currently, only option is **fixed-window-count**.
 
 | Name | Description | Required | Default |
 |:---:|:---:|:---:|:---:|
 |name | Algorithm's special name like enum  | no | fixed-window-count |
 |options.windowLengthInSeconds | Valid for fixed-window-count and specifies the windows length.   | no | 60 |
-
+-->
 In the `rules` array, you specify your rules. The pattern on the rule is basically a Regular Expression. _Rules are
 processed sequentially._
 
@@ -92,7 +87,8 @@ processed sequentially._
 |pattern | Regular expression to comparison pattern.   | yes | None |
 |limit | Limit of the total requests   | yes | 0 |
 |scope | Specifies the increment key. Can be `rule` or `path`. Rule pattern is used as increment key. Otherwise request's `METHOD PATH`   | no | `$defaultRuleScope` |
-|windowLengthInSeconds | Custom period of just this rule   | no | `$algorithm.options.windowLengthInSeconds` |
+
+<!--|windowLengthInSeconds | Custom period of just this rule   | no | `$algorithm.options.windowLengthInSeconds` |-->
 
 In the `tracing` object, you specify a tracing method for this app. We support only NewRelic right now.
 
@@ -120,6 +116,7 @@ You can do this request 4 times on each 30 seconds.
 
 ## Todo
 
+- [ ] Implement windowLengthInSeconds
 - [ ] Kubernetes Operator
 - [ ] OpenTelemetry Support
 - [ ] Rich algorithm support
