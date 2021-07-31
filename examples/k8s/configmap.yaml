@@ -5,7 +5,11 @@ metadata:
   namespace: hello-app
 data:
   config.yaml: |
-    appServerAddr: "http://127.0.0.1:8081"
+    app:
+      port: 8081
+      hosts:
+        - localhost
+      timeout: 1s
     server:
       addr: ":8080"
       readTimeout: 1000

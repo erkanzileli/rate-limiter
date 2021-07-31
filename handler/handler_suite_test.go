@@ -15,8 +15,7 @@ import (
 )
 
 var (
-	mockAppServerAddr     = "127.0.0.1:9000"
-	mockAppServerHttpAddr = fmt.Sprintf("http://%s", mockAppServerAddr)
+	mockAppServerAddr = "127.0.0.1:9000"
 
 	mockRateLimiterServerAddr     = "127.0.0.1:9001"
 	mockRateLimiterServerHttpAddr = fmt.Sprintf("http://%s", mockRateLimiterServerAddr)
@@ -55,7 +54,9 @@ func (suite *Suite) SetupSuite() {
 
 func (suite *Suite) SetupTest() {
 	time.Sleep(1 * time.Second)
-	configs.AppConfig.AppServerAddr = mockAppServerHttpAddr
+	configs.Config.AppConfig.Port = "8080"
+	configs.Config.AppConfig.Hosts = []string{mockAppServerAddr}
+	configs.Config.AppConfig.Timeout = time.Second
 
 	suite.httpClient = &http.Client{}
 	suite.rateLimitService = &rateLimitServiceMock{}

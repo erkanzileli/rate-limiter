@@ -2,14 +2,12 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/erkanzileli/rate-limiter/configs"
 	"github.com/erkanzileli/rate-limiter/service/rate-limit-service"
 	"github.com/erkanzileli/rate-limiter/tracing/new-relic"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 	"net/http"
-	"time"
 )
 
 type ReverseProxyHandler interface {
@@ -17,17 +15,22 @@ type ReverseProxyHandler interface {
 }
 
 type handler struct {
+	client           *fasthttp.HostClient
 	rateLimitService rate_limit_service.RateLimitService
 }
 
 func New(rateLimitService rate_limit_service.RateLimitService) *handler {
 	return &handler{
+		client: &fasthttp.HostClient{
+			Addr:     configs.Config.AppConfig.GetAddresses(),
+			MaxConns: 1024,
+		},
 		rateLimitService: rateLimitService,
 	}
 }
 
 func (h *handler) Handle(reqCtx *fasthttp.RequestCtx) {
-	method, path := string(reqCtx.Method()), string(reqCtx.Request.URI().Path())
+	method, path := string(reqCtx.Method()), string(reqCtx.Request.URI().RequestURI())
 	ctx := context.Background()
 	ctx, endTxn := new_relic.StartTransaction(ctx, method+" "+path)
 	defer endTxn()
@@ -44,7 +47,7 @@ func (h *handler) Handle(reqCtx *fasthttp.RequestCtx) {
 		return
 	}
 
-	redirectResp, err := redirect(ctx, reqCtx)
+	redirectResp, err := h.redirect(ctx, reqCtx)
 	if err != nil {
 		reqCtx.Response.SetBody([]byte(err.Error()))
 		reqCtx.Response.SetStatusCode(http.StatusInternalServerError)
@@ -58,12 +61,12 @@ func (h *handler) Handle(reqCtx *fasthttp.RequestCtx) {
 	passResponse(ctx, reqCtx, redirectResp)
 }
 
-func redirect(ctx context.Context, reqCtx *fasthttp.RequestCtx) (*fasthttp.Response, error) {
+func (h *handler) redirect(ctx context.Context, reqCtx *fasthttp.RequestCtx) (*fasthttp.Response, error) {
 	defer new_relic.StartSegment(ctx)
 
-	method, routingUrl := string(reqCtx.Method()), getRoutingUrl(string(reqCtx.Request.URI().Path()))
+	method, requestUri := string(reqCtx.Method()), string(reqCtx.Request.RequestURI())
 
-	zap.L().Debug("Redirecting.", zap.String("routingUrl", routingUrl))
+	zap.L().Debug("Redirecting.", zap.String("requestUri", requestUri))
 
 	redirectReq := fasthttp.AcquireRequest()
 	redirectResp := fasthttp.AcquireResponse()
@@ -71,13 +74,15 @@ func redirect(ctx context.Context, reqCtx *fasthttp.RequestCtx) (*fasthttp.Respo
 	defer fasthttp.ReleaseRequest(redirectReq)
 
 	redirectReq.Header.SetMethod(method)
-	redirectReq.SetRequestURI(routingUrl)
+	redirectReq.SetRequestURI(string(reqCtx.Request.RequestURI()))
 	redirectReq.SetBody(reqCtx.Request.Body())
+
+	reqCtx.Request.Header.Del("Connection")
 	reqCtx.Request.Header.VisitAll(func(key, value []byte) {
 		redirectReq.Header.Set(string(key), string(value))
 	})
 
-	err := fasthttp.DoTimeout(redirectReq, redirectResp, 1*time.Second)
+	err := h.client.DoTimeout(redirectReq, redirectResp, configs.Config.AppConfig.Timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -90,11 +95,9 @@ func passResponse(ctx context.Context, reqCtx *fasthttp.RequestCtx, resp *fastht
 
 	reqCtx.Response.SetBody(resp.Body())
 	reqCtx.Response.SetStatusCode(resp.StatusCode())
+
+	resp.Header.Del("Connection")
 	resp.Header.VisitAll(func(key, value []byte) {
 		reqCtx.Response.Header.Set(string(key), string(value))
 	})
-}
-
-func getRoutingUrl(path string) string {
-	return fmt.Sprintf("%s%s", configs.AppConfig.AppServerAddr, path)
 }

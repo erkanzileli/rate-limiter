@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/erkanzileli/rate-limiter/configs"
+	"github.com/erkanzileli/rate-limiter/handler"
 	testifyAssert "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/valyala/fasthttp"
@@ -65,11 +66,11 @@ func (suite *Suite) Test_it_should_redirect_when_rate_limiting_is_fails() {
 		ctx.Response.SetStatusCode(http.StatusOK)
 	}
 
-	suite.rateLimitService.On("CanProceed", mock.Anything, "GET", "/users").
+	suite.rateLimitService.On("CanProceed", mock.Anything, "GET", "/users?name=gümüşhacıköy").
 		Return(false, fmt.Errorf("cache-error"))
 
 	// When
-	resp, err := http.Get(mockRateLimiterServerHttpAddr + "/users")
+	resp, err := http.Get(mockRateLimiterServerHttpAddr + "/users?name=gümüşhacıköy")
 
 	// Then
 	assert.Nil(err)
@@ -100,7 +101,10 @@ func (suite *Suite) Test_it_should_return_error_when_redirection_fails() {
 	assert := testifyAssert.New(t)
 
 	// Given
-	configs.AppConfig.AppServerAddr = "http://mock"
+	configs.Config.AppConfig.Hosts = []string{"asdf"}
+	suite.handler = handler.New(suite.rateLimitService)
+	suite.rateLimiterServer.Handler = suite.handler.Handle
+
 	suite.rateLimitService.On("CanProceed", mock.Anything, "GET", "/users").Return(true, nil)
 
 	// When

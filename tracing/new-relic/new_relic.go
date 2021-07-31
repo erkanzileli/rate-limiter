@@ -13,8 +13,8 @@ var (
 )
 
 func CreateAgent() (err error) {
-	if configs.AppConfig.Tracing.Enabled {
-		newRelicConfig := configs.AppConfig.Tracing.NewRelic
+	if configs.Config.Tracing.Enabled {
+		newRelicConfig := configs.Config.Tracing.NewRelic
 		agent, err = newrelic.NewApplication(
 			newrelic.ConfigAppName(newRelicConfig.AppName),
 			newrelic.ConfigLicense(newRelicConfig.LicenseKey),

@@ -1,61 +1,39 @@
 package configs
 
 import (
-	"github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
+	"fmt"
+	"strings"
+	"time"
+)
+
+const (
+	colon      = ":"
+	comma      = ","
+	addrFormat = "http://%s:%s"
 )
 
 type appConfig struct {
-	v *viper.Viper
+	// Port is the app port
+	Port string
 
-	// AppServerAddr is an url with http scheme which will use to for redirecting the requests from rate-limiter.
-	AppServerAddr string
+	// Hosts can be IP or IP:PORT list
+	Hosts []string
 
-	// Server contains server configurations.
-	Server serverConfig
-
-	// Cache contains cache configurations.
-	Cache cacheConfig
-
-	// Algorithm contains algorithm options. Not required.
-	Algorithm algorithmConfig
-
-	// Rules are basically rate limiting rules.
-	Rules []ruleConfig
-
-	DefaultRuleScope string
-
-	// Tracing contains tracing options. Only NewRelic is supported for now.
-	Tracing tracingConfig
+	// Timeout is client timeout when redirecting the requests
+	Timeout time.Duration
 }
 
-func (a *appConfig) readWithViper(shouldPanic bool) error {
-	if a.v == nil {
-		v := viper.New()
-		v.SetConfigFile(configFilePath)
-		a.v = v
-	}
-
-	err := a.v.ReadInConfig()
-	if err != nil {
-		if shouldPanic {
-			zap.L().Fatal("config read error", zap.Error(err))
+func (a appConfig) GetAddresses() (hosts string) {
+	for i, host := range a.Hosts {
+		if strings.ContainsAny(host, colon) {
+			hosts += host
+		} else {
+			hosts += fmt.Sprint(addrFormat, host, a.Port)
 		}
-		return err
-	}
 
-	err = a.v.Unmarshal(&AppConfig)
-	if err != nil {
-		if shouldPanic {
-			zap.L().Fatal("config unmarshall error", zap.Error(err))
+		if i+1 < len(a.Hosts) {
+			hosts += comma
 		}
-		return err
 	}
-
-	rate_limit_rule_repository.Rules = compileRules(a.Rules)
-
-	a.Tracing.validateProvider()
-
-	return nil
+	return hosts
 }

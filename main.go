@@ -49,25 +49,25 @@ func main() {
 	server := createServer(h.Handle)
 
 	go func() {
-		if err := fasthttp.ListenAndServe(configs.AppConfig.Server.Addr, server.Handler); err != nil {
+		if err := fasthttp.ListenAndServe(configs.Config.Server.Addr, server.Handler); err != nil {
 			logger.Fatal("server error", zap.Error(err))
 		}
 	}()
 
-	logger.Info("Running on: " + configs.AppConfig.Server.Addr)
+	logger.Info("Running on: " + configs.Config.Server.Addr)
 
 	handleGracefulShutdown(server)
 }
 
 func newCacheRepository() repository.CacheRepository {
-	if configs.AppConfig.Cache.InMemory {
+	if configs.Config.Cache.InMemory {
 		return in_memory_cache_repository.New()
 	}
 	redisClientOptions := redis.Options{
-		Addr:     configs.AppConfig.Cache.Redis.Addr,
-		Username: configs.AppConfig.Cache.Redis.Username,
-		Password: configs.AppConfig.Cache.Redis.Password,
-		DB:       configs.AppConfig.Cache.Redis.DB,
+		Addr:     configs.Config.Cache.Redis.Addr,
+		Username: configs.Config.Cache.Redis.Username,
+		Password: configs.Config.Cache.Redis.Password,
+		DB:       configs.Config.Cache.Redis.DB,
 	}
 	client := redis.NewClient(&redisClientOptions)
 	return redis_cache_repository.New(client)
@@ -92,7 +92,7 @@ func createServer(handler func(ctx *fasthttp.RequestCtx)) *fasthttp.Server {
 		ErrorHandler: func(ctx *fasthttp.RequestCtx, err error) {
 			zap.L().Error("Server error occurred.", zap.Error(err))
 		},
-		ReadTimeout:  time.Duration(configs.AppConfig.Server.ReadTimeout) * time.Millisecond,
-		WriteTimeout: time.Duration(configs.AppConfig.Server.WriteTimeout) * time.Millisecond,
+		ReadTimeout:  time.Duration(configs.Config.Server.ReadTimeout) * time.Millisecond,
+		WriteTimeout: time.Duration(configs.Config.Server.WriteTimeout) * time.Millisecond,
 	}
 }
