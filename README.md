@@ -120,7 +120,6 @@ You can do this request 4 times on each 30 seconds.
 
 ## Todo
 
-- [ ] Change config structure to give `app: { addr connectTimeout readTimeout }`
 - [ ] Kubernetes Operator
 - [ ] OpenTelemetry Support
 - [ ] Rich algorithm support
