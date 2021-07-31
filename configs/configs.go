@@ -2,7 +2,7 @@ package configs
 
 import (
 	"github.com/fsnotify/fsnotify"
-	"log"
+	"go.uber.org/zap"
 )
 
 var (
@@ -17,9 +17,9 @@ func InitConfigs(configPath string) {
 	AppConfig.v.OnConfigChange(func(in fsnotify.Event) {
 		err := AppConfig.readWithViper(false)
 		if err != nil {
-			log.Println("Error on refreshing application configs due to file change, error: ", err)
+			zap.L().Error("Failed to refreshing application configs due to file change.", zap.Error(err))
 			return
 		}
-		log.Println("Application configs are changed")
+		zap.L().Info("Application configs are changed")
 	})
 }

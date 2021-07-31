@@ -10,8 +10,7 @@ type RateLimitRuleRepository interface {
 	GetRules() []model.Rule
 }
 
-type repo struct {
-}
+type repo struct{}
 
 func New() RateLimitRuleRepository {
 	return &repo{}

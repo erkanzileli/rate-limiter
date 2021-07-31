@@ -2,7 +2,7 @@ package configs
 
 import (
 	"github.com/erkanzileli/rate-limiter/model"
-	"log"
+	"go.uber.org/zap"
 	"regexp"
 )
 
@@ -32,7 +32,7 @@ func compileRules(rules []ruleConfig) []model.Rule {
 	for _, r := range rules {
 		regex, err := regexp.Compile(r.Pattern)
 		if err != nil {
-			log.Printf("error compiling rule pattern into a regexp: %+v\n", err)
+			zap.L().Error("error compiling rule pattern into a regexp.", zap.Error(err))
 			continue
 		}
 

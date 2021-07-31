@@ -8,6 +8,7 @@ import (
 	"github.com/erkanzileli/rate-limiter/service/rate-limit-service"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap"
 	"testing"
 )
 
@@ -19,6 +20,10 @@ type Suite struct {
 }
 
 func Test(t *testing.T) {
+	logger, _ := zap.NewProduction()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
+
 	suite.Run(t, new(Suite))
 }
 

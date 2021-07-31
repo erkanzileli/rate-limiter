@@ -7,6 +7,10 @@ import (
 	"github.com/erkanzileli/rate-limiter/tracing/new-relic"
 )
 
+var (
+	initialIncrementValue int64 = 1
+)
+
 type repo struct {
 	cache *ristretto.Cache
 }
@@ -32,6 +36,6 @@ func (s *repo) Increment(ctx context.Context, key interface{}) (int64, error) {
 		s.cache.SetWithTTL(key, newValue, 1, repository.IncrementKeyTTL)
 		return newValue, nil
 	}
-	s.cache.SetWithTTL(key, int64(1), 1, repository.IncrementKeyTTL)
-	return 1, nil
+	s.cache.SetWithTTL(key, initialIncrementValue, 1, repository.IncrementKeyTTL)
+	return initialIncrementValue, nil
 }

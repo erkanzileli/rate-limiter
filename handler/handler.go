@@ -7,7 +7,7 @@ import (
 	"github.com/erkanzileli/rate-limiter/service/rate-limit-service"
 	"github.com/erkanzileli/rate-limiter/tracing/new-relic"
 	"github.com/valyala/fasthttp"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -32,13 +32,15 @@ func (h *handler) Handle(reqCtx *fasthttp.RequestCtx) {
 	ctx, endTxn := new_relic.StartTransaction(ctx, method+" "+path)
 	defer endTxn()
 
-	log.Printf("Received %s %s\n", method, path)
+	zapPath, zapMethod := zap.String("path", path), zap.String("method", method)
+
+	zap.L().Debug("Received request.", zapPath, zapMethod)
 
 	if ok, err := h.rateLimitService.CanProceed(ctx, method, path); err != nil {
-		log.Printf("Rate limit skipping due to error: %+v", err)
+		zap.L().Error("Rate limiting skipping due to error.", zap.Error(err), zapPath, zapMethod)
 	} else if !ok {
 		reqCtx.Response.SetStatusCode(http.StatusTooManyRequests)
-		log.Println("Too many requests!")
+		zap.L().Debug("Too many requests!", zap.String("method", method), zap.String("path", path))
 		return
 	}
 
@@ -61,7 +63,7 @@ func redirect(ctx context.Context, reqCtx *fasthttp.RequestCtx) (*fasthttp.Respo
 
 	method, routingUrl := string(reqCtx.Method()), getRoutingUrl(string(reqCtx.Request.URI().Path()))
 
-	log.Printf("Redirecting to -> %s\n", routingUrl)
+	zap.L().Debug("Redirecting.", zap.String("routingUrl", routingUrl))
 
 	redirectReq := fasthttp.AcquireRequest()
 	redirectResp := fasthttp.AcquireResponse()

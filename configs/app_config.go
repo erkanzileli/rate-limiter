@@ -3,13 +3,13 @@ package configs
 import (
 	"github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
 	"github.com/spf13/viper"
-	"log"
+	"go.uber.org/zap"
 )
 
 type appConfig struct {
 	v *viper.Viper
 
-	// AppServerAddr is a url with http scheme which will used to be redirect the requests from rate-limiter.
+	// AppServerAddr is an url with http scheme which will use to for redirecting the requests from rate-limiter.
 	AppServerAddr string
 
 	// Server contains server configurations.
@@ -40,7 +40,7 @@ func (a *appConfig) readWithViper(shouldPanic bool) error {
 	err := a.v.ReadInConfig()
 	if err != nil {
 		if shouldPanic {
-			log.Fatalf("config read error: %+v", err)
+			zap.L().Fatal("config read error", zap.Error(err))
 		}
 		return err
 	}
@@ -48,7 +48,7 @@ func (a *appConfig) readWithViper(shouldPanic bool) error {
 	err = a.v.Unmarshal(&AppConfig)
 	if err != nil {
 		if shouldPanic {
-			log.Fatalf("config unmarshall error: %+v", err)
+			zap.L().Fatal("config unmarshall error", zap.Error(err))
 		}
 		return err
 	}

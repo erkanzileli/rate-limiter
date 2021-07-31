@@ -6,8 +6,8 @@ import (
 	"github.com/erkanzileli/rate-limiter/model"
 	"github.com/erkanzileli/rate-limiter/repository"
 	"github.com/erkanzileli/rate-limiter/repository/rate-limit-rule-repository"
-	new_relic "github.com/erkanzileli/rate-limiter/tracing/new-relic"
-	"log"
+	"github.com/erkanzileli/rate-limiter/tracing/new-relic"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -47,13 +47,14 @@ func (s *service) CanProceed(ctx context.Context, method, path string) (canProce
 	actualUsage, err := s.cacheRepository.Increment(ctx, incrementKey)
 
 	if err != nil {
-		log.Printf("Request can't be limited due to cache repository error: %+v\n", err)
+		zap.L().Error("Request can't be limited due to cache repository error.", zap.Error(err))
 		return true, err
 	}
 
 	if actualUsage > matchedRule.Limit {
-		log.Printf("Key %s cannot be processed due to pattern %s with limit %d was exceeded and actual is %d\n",
-			requestHash, matchedRule.Pattern, matchedRule.Limit, actualUsage)
+		zap.L().Debug("Limit is reached",
+			zap.String("requestHash", requestHash), zap.String("rulePattern", matchedRule.Pattern),
+			zap.Int64("ruleLimit", matchedRule.Limit), zap.Int64("actualUsage", actualUsage))
 		return false, err
 	}
 

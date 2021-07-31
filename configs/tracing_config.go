@@ -1,6 +1,8 @@
 package configs
 
-import "log"
+import (
+	"go.uber.org/zap"
+)
 
 const (
 	newRelicProvider = "new-relic"
@@ -37,6 +39,6 @@ func (t *tracingConfig) validateProvider() {
 	case newRelicProvider:
 	default:
 		t.Enabled = false
-		log.Println("Tracing is set as disabled due to invalid provider name:", t.Provider)
+		zap.L().Warn("Tracing is set as disabled due to invalid provider name.", zap.String("providerName", t.Provider))
 	}
 }
